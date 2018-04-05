@@ -63,4 +63,13 @@
         android:inputType="textPersonName"
         tools:layout_editor_absoluteX="27dp"
         tools:layout_editor_absoluteY="423dp" />
+
+    <Button
+        android:id="@+id/btn_iniciaServer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignEnd="@+id/btn_IP"
+        android:layout_alignStart="@+id/edt_IP"
+        android:layout_below="@+id/btn_IP"
+        android:text="Iniciar servidor" />
 </RelativeLayout>

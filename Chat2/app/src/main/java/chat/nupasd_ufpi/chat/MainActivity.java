@@ -22,7 +22,7 @@ import java.net.Socket;
 
 public class MainActivity extends AppCompatActivity {
 
-    Button b_IP, b_Mensagem;
+    Button b_IP, b_Mensagem,b_iniciaServer;
     EditText et_IP, et_Mensagem;
     TextView t_Mensagem;
     String IP, mensg, txt;
@@ -51,6 +51,14 @@ public class MainActivity extends AppCompatActivity {
         et_IP = (EditText) findViewById(R.id.edt_IP);
         et_Mensagem = (EditText) findViewById(R.id.edt_Mensagem);
         t_Mensagem = (TextView) findViewById(R.id.txt_ExibirMensagem);
+        b_iniciaServer = (Button) findViewById(R.id.btn_iniciaServer);
+
+        b_iniciaServer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                iniciaServer();
+            }
+        });
 
         b_IP.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -62,6 +70,35 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
+
+
+
+
+        b_Mensagem.setOnClickListener(new View.OnClickListener() {
+
+
+            @Override
+            public void onClick(View view) {
+
+                //final Handler handler = new Handler();
+                final Handler handler = new Handler();
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        enviaMensagem();
+                    }
+                });
+
+
+
+            }
+        });
+
+
+    }
+
+
+    public void iniciaServer(){
         Thread thread = new Thread(new Runnable() {
 
             @Override
@@ -97,31 +134,8 @@ public class MainActivity extends AppCompatActivity {
         });
         thread.start();
 
-
-
-
-        b_Mensagem.setOnClickListener(new View.OnClickListener() {
-
-
-            @Override
-            public void onClick(View view) {
-
-                //final Handler handler = new Handler();
-                final Handler handler = new Handler();
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        enviaMensagem();
-                    }
-                });
-
-
-
-            }
-        });
-
-
     }
+
 
     public void updateUI(final String str){
         hand.post(new Runnable() {
@@ -129,8 +143,8 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
 
                 String s = t_Mensagem.getText().toString();
-                if (IP.trim().length() != 0)
-                    t_Mensagem.setText(s + "\n" + "Enviado por Client: " +str);
+
+                t_Mensagem.setText(s + "\n" + "Enviado por Client: " +str);
             }
         });
     }
@@ -138,26 +152,50 @@ public class MainActivity extends AppCompatActivity {
 
     public void enviaMensagem(){
 
-
-                    try {
-
                         //Adicionando o IP configurável aqui
+                Handler handler = new Handler();
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
 
-                        Socket s = new Socket(IP, 9002);
+                            //
 
-                        OutputStream out = s.getOutputStream();
+                            Thread thread = new Thread(new Runnable() {
+                                @Override
+                                public void run() {
 
-                        PrintWriter output = new PrintWriter(out);
+                                    try {
 
-                        output.println(et_Mensagem.getText().toString());
-                        output.flush();
+                                    Socket s = new Socket(IP, 9002);
 
-                        output.close();
-                        out.close();
-                        s.close();
-                    } catch (IOException ver) {
-                        Toast.makeText(MainActivity.this, "Erro no envio da mensagem", Toast.LENGTH_SHORT).show();
+                                    OutputStream out = s.getOutputStream();
+
+                                    PrintWriter output = new PrintWriter(out);
+
+                                    output.println(et_Mensagem.getText().toString());
+                                    output.flush();
+
+                                    output.close();
+                                    out.close();
+                                    s.close();
+                                } catch (IOException ver) {
+                                    Toast.makeText(MainActivity.this, "Erro no envio da mensagem", Toast.LENGTH_SHORT).show();
+                                }
+                                }
+                            });
+
+                            thread.start();
+
+
+
+
+                                String s = t_Mensagem.getText().toString();
+
+                                t_Mensagem.setText(s + "\n EU: " + et_Mensagem.getText().toString());
+
+
                     }
+                });
 
 
     }

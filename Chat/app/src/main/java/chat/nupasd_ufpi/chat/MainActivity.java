@@ -22,7 +22,7 @@ import java.net.Socket;
 
 public class MainActivity extends AppCompatActivity {
 
-    Button b_IP, b_Mensagem;
+    Button b_IP, b_Mensagem, IniciaServer;
     EditText et_IP, et_Mensagem;
     TextView t_Mensagem;
     String IP, mensg, txt;
@@ -53,6 +53,18 @@ public class MainActivity extends AppCompatActivity {
         et_IP = (EditText) findViewById(R.id.edt_IP);
         et_Mensagem = (EditText) findViewById(R.id.edt_Mensagem);
         t_Mensagem = (TextView) findViewById(R.id.txt_ExibirMensagem);
+        IniciaServer = (Button) findViewById(R.id.btn_IniciarServer);
+
+
+        IniciaServer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startServerSocket();
+
+            }
+        });
+
+
 
         b_IP.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -62,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
+/*
         Thread thread = new Thread(new Runnable() {
 
             @Override
@@ -79,11 +91,11 @@ public class MainActivity extends AppCompatActivity {
 
                         mensg = input.readLine();
 
-                        /*try {
+                        try {
                             Thread.sleep(1000);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
-                        }*/
+                        }
 
                         updateUI(mensg);
 
@@ -97,7 +109,7 @@ public class MainActivity extends AppCompatActivity {
 
         });
         thread.start();
-
+*/
 
 
 
@@ -105,33 +117,108 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                hand.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
+               Handler handler = new Handler();
+               handler.post(new Runnable() {
+                   @Override
+                   public void run() {
+                       Thread thread = new Thread(new Runnable() {
+                           @Override
+                           public void run() {
+                               try {
 
 
-                           //Adicionando o IP configurável aqui
+                                   //Adicionando o IP configurável aqui
 
-                            Socket s = new Socket(IP, 9000);
+                                   Socket s = new Socket(IP, 9000);
 
-                            OutputStream out = s.getOutputStream();
+                                   OutputStream out = s.getOutputStream();
 
-                            PrintWriter output = new PrintWriter(out);
+                                   PrintWriter output = new PrintWriter(out);
 
-                            output.println(et_Mensagem.getText().toString());
-                            output.flush();
+                                   output.println(et_Mensagem.getText().toString());
+                                   output.flush();
 
-                        } catch (IOException ver) {
-                            Toast.makeText(MainActivity.this, "Erro no envio da mensagem", Toast.LENGTH_SHORT).show();
-                        }
+                               } catch (IOException ver) {
+                                   Toast.makeText(MainActivity.this, "Erro no envio da mensagem", Toast.LENGTH_SHORT).show();
+                               }
 
-                    }
-                });
+                           }
+                       });
+                       thread.start();
+
+
+                       //Adiciona mensagem do dispositivo
+                       String s = t_Mensagem.getText().toString();
+
+                       t_Mensagem.setText(s + "\n EU: " + et_Mensagem.getText().toString());
+
+
+
+                   }
+               });
+
+
+
+
+
+
             }
         });
 
     }
+
+
+
+    private void startServerSocket() {
+
+
+
+                Thread thread = new Thread(new Runnable() {
+
+                    @Override
+                    public void run() {
+
+                        try {
+
+                            ServerSocket ss = new ServerSocket(9002);
+
+                            while (true) {
+                                //Server is waiting for client here, if needed
+                                Socket s = ss.accept();
+                                BufferedReader input = new BufferedReader(new InputStreamReader(s.getInputStream()));
+
+                                mensg = input.readLine();
+
+                                try {
+                                    Thread.sleep(1000);
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+
+                                updateUI(mensg);
+
+                                s.close();
+                            }
+                            //ss.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                            Toast.makeText(MainActivity.this, "Erro na criação do servidor!", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                });
+                thread.start();
+
+
+
+
+
+
+
+
+    }
+
+
 
 
     public void updateUI(final String str){
@@ -140,8 +227,8 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
 
                 String s = t_Mensagem.getText().toString();
-                if (IP.trim().length() != 0)
-                    t_Mensagem.setText(s + "\n" + "Enviado por Client: " +str);
+
+                t_Mensagem.setText(s + "\n" + "Enviado por Client: " +str);
             }
         });
     }
